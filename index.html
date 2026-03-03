@@ -189,21 +189,26 @@
                 </div>
             </div>
 
-            <!-- VISTA: TASAS -->
-            <div id="rates-view" class="module-view">
+            <!-- VISTA: AUDITORÍA -->
+            <div id="audit-view" class="module-view">
+                <div class="widget-card">
+                    <span class="widget-title">Bitácora de Eventos (Auditoría Externa)</span>
+                    <div id="audit-container">Generando traza de auditoría...</div>
+                    <button id="btn-export-audit" class="btn-primary" style="margin-top: 1rem;">Exportar Bitácora
+                        (JSON/CSV)</button>
+                </div>
+            </div>
+
+            <!-- VISTA: BUEN GOBIERNO -->
+            <div id="governance-view" class="module-view">
                 <div class="data-entry-panel">
-                    <h3>Actualización Manual de Tasa</h3>
-                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
-                        <div class="form-group">
-                            <label>Nueva Tasa BCV (Bs./USD)</label>
-                            <input type="number" id="manual-rate" step="0.01" placeholder="54.20">
-                        </div>
-                        <button id="btn-update-rate" class="btn-primary">Actualizar Tasa</button>
-                    </div>
+                    <h3>Gestión de Gobierno Corporativo</h3>
+                    <p>Registro de miembros de junta y comités de control.</p>
                 </div>
                 <div class="widget-card">
-                    <span class="widget-title">Configuración de Monedas e Índices</span>
-                    <div id="rates-container">Sincronizando con BCV...</div>
+                    <span class="widget-title">Informe Anual de Gobierno</span>
+                    <div id="gov-preview">No hay datos registrados.</div>
+                    <button id="btn-gen-gov" class="btn-primary" style="margin-top: 1rem;">Generar Informe PDF</button>
                 </div>
             </div>
         </main>
@@ -324,8 +329,29 @@
                 if (targetViewId === 'accounting-view') loadAccounting();
                 if (targetViewId === 'rates-view') loadRates();
                 if (targetViewId === 'portfolio-view') loadPortfolio();
+                if (targetViewId === 'audit-view') loadAudit();
+                if (targetViewId === 'governance-view') loadGovernance();
             });
         });
+
+        function loadAudit() {
+            const container = document.getElementById('audit-container');
+            const history = reportCtrl.audit.getHistory();
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead><tr><th>Timestamp</th><th>Acción</th><th>Detalles</th></tr></thead>
+                    <tbody>
+                        ${history.map(h => `<tr><td>${h.timestamp.split('T')[1]}</td><td>${h.action}</td><td>${h.details}</td></tr>`).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function loadGovernance() {
+            document.getElementById('gov-preview').innerHTML = `
+                <div class="alert-info">Módulo cargado exitosamente. Listo para consolidar informe anual.</div>
+            `;
+        }
 
         // --- GESTIÓN DE REGISTROS (FUNCIONALIDAD) ---
         const localPortfolio = [

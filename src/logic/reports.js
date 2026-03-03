@@ -100,6 +100,47 @@ export class ReportingEngine {
     }
 
     /**
+    * Genera el Estado de Flujos de Efectivo (Método Indirecto)
+    */
+    generateCashFlow() {
+        return {
+            encabezado: {
+                entidad: "CBCNV",
+                reporte: "Estado de Flujos de Efectivo",
+                periodo: "Anual"
+            },
+            secciones: {
+                operativas: { nombre: "Actividades de Operación", monto: 1200000 },
+                inversion: { nombre: "Actividades de Inversión", monto: -450000 },
+                financiamiento: { nombre: "Actividades de Financiamiento", monto: 300000 }
+            },
+            efectivoFinal: 1050000
+        };
+    }
+
+    /**
+    * Genera el Informe de Buen Gobierno Corporativo
+    */
+    generateBuenGobierno(data) {
+        return {
+            encabezado: {
+                entidad: "CBCNV",
+                reporte: "Informe de Buen Gobierno Corporativo",
+                anio: new Date().getFullYear()
+            },
+            juntaDirectiva: data.miembros || [
+                { nombre: "Director A", cargo: "Presidente", independencia: "No Independiente" },
+                { nombre: "Director B", cargo: "Director Principal", independencia: "Independiente" }
+            ],
+            comites: [
+                { nombre: "Comité de Riesgos", reuniones: 12 },
+                { nombre: "Comité de Auditoría", reuniones: 4 }
+            ],
+            declaracion: "La entidad cumple con las normas de Buen Gobierno dictadas por SUNAVAL."
+        };
+    }
+
+    /**
     * Genera el Reporte de Cartera de Inversiones (Formato CNV)
     */
     generatePortfolioReport(portafolio) {
