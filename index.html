@@ -218,18 +218,30 @@
     <script type="module">
         import { DashboardController } from './src/ui/dashboardController.js';
         import { ROLES } from './src/security/roles.js';
+        import { ReportController } from './src/ui/reportController.js';
+        import { Database } from './src/data/database.js';
 
-        // Simulación de Estado Global
-        const currentUser = { id: 1, name: "Jack Nickelsen", role: ROLES.OFICIAL_CUMPLIMIENTO };
-        const financialData = {
-            activos: 5000000,
-            patrimonio: 3965000,
-            capitalPagado: 3000000,
-            activoCorriente: 1500000,
-            pasivoCorriente: 850000
+        // Inicializar DB
+        const db = new Database();
+        await db.init();
+
+        // Estado Global
+        const currentUser = { id: 1, username: "jSantrich", name: "Jack Nickelsen", role: ROLES.OFICIAL_CUMPLIMIENTO };
+        const financialData = { activos: 5000000, patrimonio: 3965000, capitalPagado: 3000000, activoCorriente: 1500000, pasivoCorriente: 850000 };
+
+        // Exponer funciones de login al window para los onclick
+        window.handleLoginStep1 = () => {
+            document.getElementById('login-step-1').style.display = 'none';
+            document.getElementById('login-step-2').style.display = 'block';
+        };
+        window.handleLoginFinal = () => {
+            document.getElementById('login-overlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('login-overlay').style.display = 'none';
+            }, 500);
+            alert("Acceso concedido. Perfil: Oficial de Cumplimiento.");
         };
 
-        // Elementos UI reales
         const uiElements = {
             solvenciaVal: document.getElementById('solvencia-val'),
             solvenciaStatus: {
@@ -251,8 +263,6 @@
         const dashboard = new DashboardController(uiElements, financialData);
         dashboard.init();
 
-        // Integración de Reportes
-        import { ReportController } from './src/ui/reportController.js';
         const reportCtrl = new ReportController(currentUser);
 
         // Event Listeners para Botones de Reporte
