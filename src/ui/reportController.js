@@ -115,6 +115,14 @@ export class ReportController {
         }
 
         html += `</tbody></table>`;
+        if (data.notas) {
+            html += `
+                <div style="margin-top: 2rem; padding: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 8px; font-size: 0.85rem;">
+                    <h4 style="color: var(--accent-gold); margin-bottom: 0.5rem;">NOTAS EXPLICATIVAS</h4>
+                    <p style="color: var(--text-secondary); line-height: 1.4;">${data.notas}</p>
+                </div>
+            `;
+        }
         container.innerHTML = html;
         section.scrollIntoView({ behavior: 'smooth' });
     }

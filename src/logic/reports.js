@@ -38,6 +38,7 @@ export class ReportingEngine {
                 revisado: "Oficial de Cumplimiento",
                 aprobado: "Presidente / Junta Directiva"
             },
+            notas: "Nota 1: El balance ha sido ajustado según la última reconversión monetaria. Nota 2: Las provisiones cumplen con el Manual de Contabilidad SUNAVAL.",
             footer: "Documento generado por Sistema CBCNV-Compliance v1.0"
         };
     }
