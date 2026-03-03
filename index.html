@@ -77,6 +77,47 @@
                 </div>
             </div>
 
+            <!-- VISTA: PORTAFOLIO -->
+            <div id="portfolio-view" class="module-view">
+                <div class="data-entry-panel">
+                    <h3>Registrar Compra de Título Valor</h3>
+                    <form id="form-portfolio"
+                        style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>Nombre del Título</label>
+                            <input type="text" id="port-nombre" placeholder="Ej: Vebono 2026" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Portafolio</label>
+                            <select id="port-tipo">
+                                <option value="T">Portafolio T (Operación)</option>
+                                <option value="PIC">Portafolio PIC (Comercialización)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto Nominal ($)</label>
+                            <input type="number" id="port-nominal" placeholder="1000.00" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Adquisición</label>
+                            <input type="date" id="port-fecha" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Emisor</label>
+                            <input type="text" id="port-emisor" placeholder="República de Venezuela">
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn-primary">Registrar Compra</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="widget-card">
+                    <span class="widget-title">Resumen de Posiciones en Títulos Valores</span>
+                    <div id="portfolio-container">Cargando portafolio...</div>
+                </div>
+            </div>
+
             <!-- VISTA: KYC -->
             <div id="kyc-view" class="module-view">
                 <div class="data-entry-panel">
@@ -282,10 +323,31 @@
                 if (targetViewId === 'kyc-view') loadKYC();
                 if (targetViewId === 'accounting-view') loadAccounting();
                 if (targetViewId === 'rates-view') loadRates();
+                if (targetViewId === 'portfolio-view') loadPortfolio();
             });
         });
 
         // --- GESTIÓN DE REGISTROS (FUNCIONALIDAD) ---
+        const localPortfolio = [
+            { nombre: "Vebono Oct 2026", tipo: "T", nominal: 50000, fecha: "2026-01-15", emisor: "República" },
+            { nombre: "PDVSA 2030", tipo: "PIC", nominal: 120000, fecha: "2025-11-20", emisor: "PDVSA" }
+        ];
+
+        document.getElementById('form-portfolio').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nuevoTitulo = {
+                nombre: document.getElementById('port-nombre').value,
+                tipo: document.getElementById('port-tipo').value,
+                nominal: parseFloat(document.getElementById('port-nominal').value),
+                fecha: document.getElementById('port-fecha').value,
+                emisor: document.getElementById('port-emisor').value
+            };
+            localPortfolio.unshift(nuevoTitulo);
+            loadPortfolio();
+            alert(`Título ${nuevoTitulo.nombre} registrado en el portafolio.`);
+            e.target.reset();
+        });
+
         const localClients = [
             { nombre: "Inversora Alcaraván", rif: "J-301234567", estatus: "Completo", riesgo: "Bajo" },
             { nombre: "Corporación del Lago", rif: "G-200987654", estatus: "Pendiente RIF", riesgo: "Medio" }
@@ -324,7 +386,36 @@
             }
         });
 
-        // --- CARGA DE MÓDULOS (MOCKS) ---
+        function loadPortfolio() {
+            const container = document.getElementById('portfolio-container');
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Título</th><th>Emisor</th><th>Tipo</th><th>Nominal ($)</th><th>Adquisición</th><th>Alertas</th></tr>
+                    </thead>
+                    <tbody>
+                        ${localPortfolio.map(p => {
+                const dias = Math.floor((new Date() - new Date(p.fecha)) / (1000 * 60 * 60 * 24));
+                const alertHtml = (p.tipo === 'T' && dias > 90) ?
+                    '<span class="status-pill pending">Límite 90d Excedido</span>' :
+                    '<span class="status-pill complete">Cumple</span>';
+
+                return `
+                                <tr>
+                                    <td>${p.nombre}</td>
+                                    <td>${p.emisor}</td>
+                                    <td>Portafolio ${p.tipo}</td>
+                                    <td style="text-align: right;">${p.nominal.toLocaleString('es-VE')}</td>
+                                    <td>${p.fecha}</td>
+                                    <td>${alertHtml}</td>
+                                </tr>
+                            `;
+            }).join('')}
+                    </tbody>
+                </table>
+            `;
+        }
+
         function loadKYC() {
             const container = document.getElementById('kyc-container');
             container.innerHTML = `
