@@ -60,6 +60,21 @@
                     <h3>Alertas de Riesgo</h3>
                     <div id="alerts-container">Buscando alertas...</div>
                 </div>
+
+                <!-- PREVISUALIZACIÓN DE REPORTES -->
+                <div class="widget-card" id="preview-section" style="margin-top: 2rem; display: none;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span class="widget-title" id="preview-title">Vista Previa de Reporte</span>
+                        <button onclick="document.getElementById('preview-section').style.display='none'"
+                            style="background: none; border: 1px solid var(--danger); color: var(--danger); padding: 2px 10px; border-radius: 4px; cursor: pointer;">Cerrar
+                            Vista</button>
+                    </div>
+                    <div id="preview-container"
+                        style="overflow-x: auto; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 1rem;">
+                        <!-- Se poblará dinámicamente -->
+                    </div>
+                </div>
             </div>
 
             <!-- VISTA: KYC -->
@@ -195,6 +210,25 @@
         const reportCtrl = new ReportController(currentUser);
 
         // Event Listeners para Botones de Reporte
+        document.getElementById('btn-pre-a').addEventListener('click', () => {
+            reportCtrl.handleGenerateBalance('PREVIEW');
+        });
+
+        document.getElementById('btn-pre-b').addEventListener('click', () => {
+            reportCtrl.handleGenerateFormaB('PREVIEW');
+        });
+
+        document.getElementById('btn-pre-c').addEventListener('click', () => {
+            const data = reportCtrl.handleGenerateFormaC();
+            reportCtrl.renderPreview({
+                encabezado: data.encabezado,
+                cuerpo: [{
+                    codigo: "300", descripcion: "PATRIMONIO", saldo: data.totalPatrimonio,
+                    detalles: data.movimientos.map(m => ({ codigo: "", descripcion: m.cuenta, saldo: m.saldoFinal }))
+                }]
+            });
+        });
+
         document.getElementById('btn-forma-a').addEventListener('click', () => {
             reportCtrl.handleGenerateBalance('PDF');
             alert("SISTEMA: Documento BALANCE GENERAL (PDF) generado y descargado con éxito.");
