@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CBCNV - Casa de Bolsa SUNAVAL</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="dark-mode">
+    <div id="app">
+        <!-- Sidebar se inyectaría aquí según ROLES -->
+        <aside id="sidebar"></aside>
+
+        <main id="main-content">
+            <header id="header">
+                <h1>Dashboard de Cumplimiento SUNAVAL</h1>
+                <div id="user-profile"></div>
+            </header>
+
+            <section id="widgets-grid">
+                <!-- Los widgets de Stitch se vuelven dinámicos aquí -->
+                <div id="indices-widget"></div>
+                <div id="portfolio-widget"></div>
+                <div id="reports-actions">
+                    <button id="btn-forma-a">Generar Forma A (Balance)</button>
+                    <button id="btn-forma-b">Generar Forma B (Resultados)</button>
+                    <button id="btn-forma-c">Generar Forma C (Patrimonio)</button>
+                    <button id="btn-cartera">Reporte de Cartera</button>
+                    <button id="btn-rias">Enviar RIAS (Mes)</button>
+                </div>
+                <div id="alerts-panel"></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Scripts de Integración -->
+    <script type="module">
+        import { DashboardController } from './src/ui/dashboardController.js';
+        import { ROLES } from './src/security/roles.js';
+
+        // Simulación de Estado Global
+        const currentUser = { id: 1, name: "Jack Nickelsen", role: ROLES.OFICIAL_CUMPLIMIENTO };
+        const financialData = {
+            activos: 5000000,
+            patrimonio: 3965000,
+            capitalPagado: 3000000,
+            activoCorriente: 1500000,
+            pasivoCorriente: 850000
+        };
+
+        // Elementos UI (Mocks de componentes Stitch)
+        const uiElements = {
+            solvenciaGauge: { setValue: (v) => console.log(`UI Solvencia: ${v}%`), setText: (t) => console.log(`UI Status: ${t}`) },
+            alertsContainer: document.getElementById('alerts-panel')
+        };
+
+        const dashboard = new DashboardController(uiElements, financialData);
+        dashboard.init();
+    </script>
+</body>
+
+</html>
