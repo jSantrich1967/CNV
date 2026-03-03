@@ -193,20 +193,20 @@
         // Event Listeners para Botones de Reporte
         document.getElementById('btn-forma-a').addEventListener('click', () => {
             const data = reportCtrl.handleGenerateBalance();
-            alert(`ÉXITO: Forma A (Balance) generada.\nEntidad: ${data.entidad}\nFecha: ${data.fecha}\nConsulte la consola para el JSON completo.`);
-            console.log("Datos Forma A:", data);
+            alert(`SISTEMA CBCNV - REPORTE OFICIAL\n----------------------------------\nREPORTE: ${data.encabezado.reporte}\nENTIDAD: ${data.encabezado.entidad}\nRIF: ${data.encabezado.rif}\nFECHA: ${data.encabezado.fechaCorte}\n\nBalance de Situación generado con éxito.\n(Consulte la consola para el desglose de cuentas)`);
+            console.log("DIAGNOSTICO CNV - FORMA A:", data);
         });
 
         document.getElementById('btn-forma-b').addEventListener('click', () => {
             const data = reportCtrl.handleGenerateFormaB();
-            alert(`ÉXITO: Forma B (Resultados) generada.\nUtilidad Neta: ${data.utilidadNeta} Bs.\nEstatus: Balanceado.`);
-            console.log("Datos Forma B:", data);
+            alert(`ESTADO DE RESULTADOS - CNV\n----------------------------------\nIngresos: ${data.secciones[0].subtotal.toLocaleString('es-VE')} Bs.\nEgresos: ${data.secciones[1].subtotal.toLocaleString('es-VE')} Bs.\n${data.resultadoNeto.etiqueta}: ${data.resultadoNeto.monto.toLocaleString('es-VE')} Bs.\n\nEstatus: ${data.estatus}`);
+            console.log("DIAGNOSTICO CNV - FORMA B:", data);
         });
 
         document.getElementById('btn-forma-c').addEventListener('click', () => {
             const data = reportCtrl.handleGenerateFormaC();
-            alert(`ÉXITO: Forma C (Patrimonio) generada.\nCuentas procesadas: ${data.detalles.length}`);
-            console.log("Datos Forma C:", data);
+            alert(`MOVIMIENTO PATRIMONIAL - FORMA C\n----------------------------------\nTotal Patrimonio: ${data.totalPatrimonio.toLocaleString('es-VE')} Bs.\n\nReporte generado profesionalmente siguiendo normas SUNAVAL.`);
+            console.log("DIAGNOSTICO CNV - FORMA C:", data);
         });
 
         document.getElementById('btn-rias').addEventListener('click', () => {

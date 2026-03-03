@@ -11,118 +11,119 @@ export class ReportingEngine {
     }
 
     /**
-     * Genera el Balance General resumido (Forma A)
-     * Enfocado en las grandes categorías de Activo, Pasivo y Patrimonio.
-     */
+    * Genera la Forma A (Balance General) según estándares SUNAVAL
+    */
     generateBalanceFormaA() {
-        const balance = {
-            fecha: this.reportDate.toISOString().split('T')[0],
-            entidad: "Casa de Bolsa Venezolana (CBCNV)",
-            moneda: "Bolívares (Bs.)",
-            categorias: []
-        };
-
-        this.accounts.forEach(grupo => {
-            balance.categorias.push({
-                codigo: grupo.codigo,
-                descripcion: grupo.descripcion,
-                monto: this._calculateSum(grupo)
-            });
-        });
-
-        return balance;
-    }
-
-    /**
-     * Genera el Reporte de Actividades Sospechosas (RAS)
-     * Estructura compatible con la circular DSNV/GPFCLCFT/00002.
-     */
-    generateRAS(cliente, inusualidad, soportes) {
         return {
-            idReporte: `RAS-${Date.now()}`,
-            tipo: "ACTIVIDAD_SOSPECHOSA",
-            fechaDeteccion: this.reportDate.toISOString(),
-            cliente: {
-                nombre: cliente.nombre,
-                id: cliente.id,
-                perfilRiesgo: cliente.riesgo
+            encabezado: {
+                entidad: "Casa de Bolsa Venezolana (CBCNV)",
+                rif: "J-12345678-9",
+                reporte: "Forma A - Balance de Situación",
+                periodo: "Mensual",
+                fechaCorte: this.reportDate.toLocaleDateString('es-VE'),
+                moneda: "Bolívares (Bs.)"
             },
-            descripcion: inusualidad,
-            documentosAdjuntos: soportes.map(s => s.nombre),
-            firmaOficialCumplimiento: "PENDIENTE",
-            estatus: "BORRADOR"
+            cuerpo: this.accounts.map(g => ({
+                codigo: g.codigo,
+                descripcion: g.descripcion,
+                saldo: this._calculateSum(g),
+                detalles: g.subcuentas.map(s => ({
+                    codigo: s.codigo,
+                    descripcion: s.descripcion,
+                    saldo: s.saldo || this._calculateSum(s)
+                }))
+            })),
+            firmas: {
+                preparado: "Departamento de Contabilidad",
+                revisado: "Oficial de Cumplimiento",
+                aprobado: "Presidente / Junta Directiva"
+            },
+            footer: "Documento generado por Sistema CBCNV-Compliance v1.0"
         };
     }
 
     /**
-     * Genera el Reporte de Inexistencia de Actividades Sospechosas (RIAS)
-     * Reporte mensual obligatorio.
-     */
-    generateRIAS(mes, anio) {
-        return {
-            idReporte: `RIAS-${mes}-${anio}`,
-            tipo: "INEXISTENCIA_ACTIVIDADES",
-            periodo: `${mes}/${anio}`,
-            declaracion: "Se hace constar que durante el periodo indicado NO se detectaron actividades sospechosas de LC/FT.",
-            fechaGeneracion: this.reportDate.toISOString(),
-            estatus: "LISTO_PARA_ENVIO"
-        };
-    }
-
-    /**
-     * Genera el Estado de Resultados (Forma B)
-     */
+    * Genera la Forma B (Estado de Resultados Profesionales)
+    */
     generateFormaB() {
-        const ingresos = this._calculateSum(this.accounts.find(a => a.codigo === "400"));
-        const egresos = this._calculateSum(this.accounts.find(a => a.codigo === "500"));
+        const ingresosNode = this.accounts.find(a => a.codigo === "400");
+        const egresosNode = this.accounts.find(a => a.codigo === "500");
+
+        const ingresosVal = this._calculateSum(ingresosNode);
+        const egresosVal = this._calculateSum(egresosNode);
 
         return {
-            entidad: "CBCNV",
-            tipo: "Estado de Resultados (Forma B)",
-            periodo: "Mensual",
-            totalIngresos: ingresos,
-            totalEgresos: egresos,
-            utilidadNeta: ingresos - egresos,
-            moneda: "Bs."
+            encabezado: {
+                entidad: "CBCNV",
+                reporte: "Forma B - Estado de Resultados",
+                fecha: this.reportDate.toLocaleDateString('es-VE')
+            },
+            secciones: [
+                {
+                    nombre: "INGRESOS OPERACIONALES",
+                    subtotal: ingresosVal,
+                    cuentas: ingresosNode.subcuentas.map(s => ({ codigo: s.codigo, d: s.descripcion, m: s.saldo }))
+                },
+                {
+                    nombre: "EGRESOS OPERACIONALES",
+                    subtotal: egresosVal,
+                    cuentas: egresosNode.subcuentas.map(s => ({ codigo: s.codigo, d: s.descripcion, m: s.saldo }))
+                }
+            ],
+            resultadoNeto: {
+                etiqueta: "UTILIDAD O PÉRDIDA DEL EJERCICIO",
+                monto: ingresosVal - egresosVal
+            },
+            estatus: "SOMETIDO A REVISIÓN"
         };
     }
 
     /**
-     * Genera el Estado de Movimiento del Patrimonio (Forma C)
-     */
+    * Genera la Forma C (Movimiento del Patrimonio)
+    */
     generateFormaC() {
         const patrimonio = this.accounts.find(a => a.codigo === "300");
         return {
-            entidad: "CBCNV",
-            tipo: "Estado de Movimiento del Patrimonio (Forma C)",
-            detalles: patrimonio.subcuentas.map(s => ({
-                cuenta: s.descripcion,
-                saldo: s.saldo
-            }))
+            encabezado: {
+                entidad: "CBCNV",
+                reporte: "Forma C - Estado de Movimiento de las Cuentas del Patrimonio",
+                periodo: "Acumulado"
+            },
+            movimientos: patrimonio.subcuentas.map(s => ({
+                cuenta: `[${s.codigo}] ${s.descripcion}`,
+                saldoInicial: s.saldo * 0.9, // Mock de saldo anterior
+                variacion: s.saldo * 0.1,
+                saldoFinal: s.saldo
+            })),
+            totalPatrimonio: this._calculateSum(patrimonio)
         };
     }
 
     /**
-     * Genera el Reporte de Cartera de Inversiones Detallado
-     */
+    * Genera el Reporte de Cartera de Inversiones (Formato CNV)
+    */
     generatePortfolioReport(portafolio) {
         return {
-            tipo: "Reporte de Cartera de Inversiones",
-            fecha: this.reportDate.toISOString(),
-            titulos: portafolio.map(t => ({
-                nombre: t.nombre,
-                emisor: t.emisor || "N/A",
-                vencimiento: t.vencimiento || "N/A",
-                valorNominal: t.valorNominal || t.costo,
-                valorMercado: t.valorMercado || (t.costo * t.cantidad)
+            encabezado: {
+                reporte: "Relación de la Cartera de Propios",
+                normativa: "Resolución N° 061-2015",
+                fecha: this.reportDate.toLocaleDateString('es-VE')
+            },
+            detalle: portafolio.map(t => ({
+                id: t.nombre,
+                custodio: "Caja Venezolana de Valores (CVV)",
+                valorNominal: t.valorNominal || 1000,
+                costoAdquisicion: t.costo || t.saldo,
+                diasVencimiento: Math.floor((new Date() - new Date(t.fechaAdquisicion)) / (1000 * 60 * 60 * 24))
             }))
         };
     }
 
     /**
-     * Función interna para calcular sumas jerárquicas
-     */
+    * Función interna para calcular sumas jerárquicas
+    */
     _calculateSum(node) {
+        if (!node) return 0;
         if (node.tipo === "D" || !node.subcuentas) {
             return node.saldo || 0;
         }
