@@ -183,6 +183,51 @@
                 </div>
             </div>
 
+            <!-- VISTA: RAS -->
+            <div id="ras-view" class="module-view">
+                <div class="data-entry-panel">
+                    <h3>Reporte de Actividad Sospechosa (RAS)</h3>
+                    <p style="margin-bottom: 1.5rem; font-size: 0.9rem; color: var(--text-secondary);">Directo a la
+                        Unidad Nacional de Inteligencia Financiera (UNIF).</p>
+                    <form id="form-ras" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Sujeto Objeto del Reporte (Cliente/Empleado)</label>
+                            <input type="text" id="ras-sujeto" placeholder="Nombre completo / RIF" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Alerta</label>
+                            <select id="ras-alerta">
+                                <option>Transacción Estructurada (Pitufeo)</option>
+                                <option>Inconsistencia Patrimonial</option>
+                                <option>Uso de Cuentas de Terceros</option>
+                                <option>Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto Involucrado (Estimado Bs.)</label>
+                            <input type="number" id="ras-monto" placeholder="0.00">
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Descripción Detallada de la Actividad</label>
+                            <textarea id="ras-desc"
+                                style="width: 100%; height: 100px; background: rgba(255,255,255,0.05); border: 1px solid var(--bg-tertiary); color: white; padding: 10px;"></textarea>
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Firma Digital del Oficial de Cumplimiento</label>
+                            <div
+                                style="padding: 20px; border: 2px dashed var(--bg-tertiary); text-align: center; border-radius: 8px;">
+                                <p
+                                    style="font-family: 'Dancing Script', cursive; font-size: 1.5rem; color: var(--accent-gold);">
+                                    ${currentUser.name}</p>
+                                <p style="font-size: 0.7rem;">Certificado UNIF-ID: 99822-X</p>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary" style="grid-column: span 2;">Enviar Reporte a
+                            UNIF</button>
+                    </form>
+                </div>
+            </div>
+
             <!-- VISTA: CONTABILIDAD -->
             <div id="accounting-view" class="module-view">
                 <div class="data-entry-panel">
@@ -367,12 +412,25 @@
 
                 // Cargar datos del módulo si es la primera vez (Simulación)
                 if (targetViewId === 'kyc-view') loadKYC();
+                if (targetViewId === 'ras-view') loadRAS();
                 if (targetViewId === 'accounting-view') loadAccounting();
                 if (targetViewId === 'rates-view') loadRates();
                 if (targetViewId === 'portfolio-view') loadPortfolio();
                 if (targetViewId === 'audit-view') loadAudit();
                 if (targetViewId === 'governance-view') loadGovernance();
             });
+        });
+
+        function loadRAS() {
+            // Vista estática con formulario funcional
+        }
+
+        document.getElementById('form-ras').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const sujeto = document.getElementById('ras-sujeto').value;
+            reportCtrl.audit.log(currentUser, "SEND_RAS", "CUMPLIMIENTO", `Reporte RAS enviado para: ${sujeto}`);
+            alert("SISTEMA UNIF: El Reporte de Actividad Sospechosa ha sido firmado digitalmente y enviado con éxito.");
+            e.target.reset();
         });
 
         function loadAudit() {
