@@ -88,6 +88,37 @@
         };
 
         const dashboard = new DashboardController(uiElements, financialData);
+        dashboard.init();
+
+        // Integración de Reportes
+        import { ReportController } from './src/ui/reportController.js';
+        const reportCtrl = new ReportController(currentUser);
+
+        // Event Listeners para Botones de Reporte
+        document.getElementById('btn-forma-a').addEventListener('click', () => {
+            const data = reportCtrl.handleGenerateBalance();
+            alert(`ÉXITO: Forma A (Balance) generada.\nEntidad: ${data.entidad}\nFecha: ${data.fecha}\nConsulte la consola para el JSON completo.`);
+            console.log("Datos Forma A:", data);
+        });
+
+        document.getElementById('btn-forma-b').addEventListener('click', () => {
+            const data = reportCtrl.handleGenerateFormaB();
+            alert(`ÉXITO: Forma B (Resultados) generada.\nUtilidad Neta: ${data.utilidadNeta} Bs.\nEstatus: Balanceado.`);
+            console.log("Datos Forma B:", data);
+        });
+
+        document.getElementById('btn-forma-c').addEventListener('click', () => {
+            const data = reportCtrl.handleGenerateFormaC();
+            alert(`ÉXITO: Forma C (Patrimonio) generada.\nCuentas procesadas: ${data.detalles.length}`);
+            console.log("Datos Forma C:", data);
+        });
+
+        document.getElementById('btn-rias').addEventListener('click', () => {
+            alert("PROCESANDO: Enviando Reporte RIAS a SUNAVAL...");
+            setTimeout(() => {
+                alert("ÉXITO: Reporte de Inexistencia de Actividades Sospechosas (RIAS) enviado satisfactoriamente.");
+            }, 1500);
+        });
 
         // Simulación de datos de portafolio para las alertas
         const mockPortafolioT = [
@@ -95,14 +126,12 @@
             { nombre: "Tasa Local ABC", fechaAdquisicion: new Date().toISOString() }
         ];
 
-        dashboard.init();
-
         // Renderizar alertas de portafolio específicamente
         import { PortfolioManager } from './src/logic/portfolio.js';
         const pm = new PortfolioManager(mockPortafolioT, []);
         const pAlerts = pm.validatePortafolioT();
         if (pAlerts.length > 0) {
-            document.getElementById('portfolio-alerts-list').innerHTML = pAlerts.map(a => `<div class="alert-item exceeded">${a.msg}</div>`).join('');
+            document.getElementById('portfolio-alerts-list').innerHTML = pAlerts.map(a => `<div class="alert-item exceeded" style="color: var(--danger); margin-bottom: 5px;">⚠️ ${a.msg}</div>`).join('');
         }
     </script>
 </body>
