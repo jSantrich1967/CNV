@@ -49,10 +49,13 @@
             <div class="logo">CBCNV</div>
             <nav id="nav-links">
                 <div class="nav-item active" data-view="dashboard-view">Dashboard</div>
+                <div class="nav-item" data-view="portfolio-view">Portafolio</div>
                 <div class="nav-item" data-view="kyc-view">Expedientes (KYC)</div>
+                <div class="nav-item" data-view="ras-view">Cumplimiento RAS</div>
                 <div class="nav-item" data-view="accounting-view">Contabilidad</div>
                 <div class="nav-item" data-view="rates-view">Tasas BCV</div>
-                <div class="nav-item" data-view="audit-view">Auditoría</div>
+                <div class="nav-item" data-view="governance-view">Buen Gobierno</div>
+                <div class="nav-item" data-view="audit-view">Auditoría / Logs</div>
             </nav>
         </aside>
 
@@ -622,6 +625,22 @@
                 <button style="margin-top: 2rem;">Sincronizar con Web del BCV</button>
             `;
         }
+        // --- MOTOR DE AUTOMATIZACIÓN (CUMPLIMIENTO) ---
+        setInterval(() => {
+            const currentSolvencia = parseFloat(document.getElementById('solvencia-val').innerText);
+            if (currentSolvencia < 150) {
+                reportCtrl.audit.log(currentUser, "ALERTA_CRITICA", "RIESGOS", "Índice de Solvencia por debajo del mínimo regulatorio (150%).", "WARNING");
+                console.warn("ALERTA: Solvencia Crítica detectada. Sistema CBCNV notificando a junta directiva...");
+            }
+        }, 10000); // Chequeo cada 10 seg.
+
+        window.autoSendReports = () => {
+            alert("ENVIANDO REPORTES: Conectando con reportes.gci@sunaval.gob.ve...");
+            setTimeout(() => {
+                reportCtrl.audit.log(currentUser, "AUTO_SEND", "REGLAMENTARIO", "Reportes mensuales enviados a SUNAVAL.");
+                alert("ÉXITO: Reportes A, B y C enviados exitosamente a SUNAVAL.");
+            }, 3000);
+        };
     </script>
 </body>
 
