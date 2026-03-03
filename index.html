@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CBCNV - Casa de Bolsa SUNAVAL</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Librerías de Exportación -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
 </head>
 
 <body class="dark-mode">
@@ -192,21 +196,23 @@
 
         // Event Listeners para Botones de Reporte
         document.getElementById('btn-forma-a').addEventListener('click', () => {
-            const data = reportCtrl.handleGenerateBalance();
-            alert(`SISTEMA CBCNV - REPORTE OFICIAL\n----------------------------------\nREPORTE: ${data.encabezado.reporte}\nENTIDAD: ${data.encabezado.entidad}\nRIF: ${data.encabezado.rif}\nFECHA: ${data.encabezado.fechaCorte}\n\nBalance de Situación generado con éxito.\n(Consulte la consola para el desglose de cuentas)`);
-            console.log("DIAGNOSTICO CNV - FORMA A:", data);
+            reportCtrl.handleGenerateBalance('PDF');
+            alert("SISTEMA: Documento BALANCE GENERAL (PDF) generado y descargado con éxito.");
+        });
+
+        document.getElementById('btn-forma-a-xl').addEventListener('click', () => {
+            reportCtrl.handleGenerateBalance('EXCEL');
+            alert("SISTEMA: Libro EXCEL de BALANCE GENERAL generado correctamente.");
         });
 
         document.getElementById('btn-forma-b').addEventListener('click', () => {
-            const data = reportCtrl.handleGenerateFormaB();
-            alert(`ESTADO DE RESULTADOS - CNV\n----------------------------------\nIngresos: ${data.secciones[0].subtotal.toLocaleString('es-VE')} Bs.\nEgresos: ${data.secciones[1].subtotal.toLocaleString('es-VE')} Bs.\n${data.resultadoNeto.etiqueta}: ${data.resultadoNeto.monto.toLocaleString('es-VE')} Bs.\n\nEstatus: ${data.estatus}`);
-            console.log("DIAGNOSTICO CNV - FORMA B:", data);
+            reportCtrl.handleGenerateFormaB('PDF');
+            alert("SISTEMA: ESTADO DE RESULTADOS (PDF) descargado.");
         });
 
         document.getElementById('btn-forma-c').addEventListener('click', () => {
-            const data = reportCtrl.handleGenerateFormaC();
-            alert(`MOVIMIENTO PATRIMONIAL - FORMA C\n----------------------------------\nTotal Patrimonio: ${data.totalPatrimonio.toLocaleString('es-VE')} Bs.\n\nReporte generado profesionalmente siguiendo normas SUNAVAL.`);
-            console.log("DIAGNOSTICO CNV - FORMA C:", data);
+            reportCtrl.handleGenerateFormaC('PDF');
+            alert("SISTEMA: ESTADO DE PATRIMONIO (PDF) descargado.");
         });
 
         document.getElementById('btn-rias').addEventListener('click', () => {
