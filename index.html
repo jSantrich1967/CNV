@@ -576,63 +576,17 @@
             `;
         }
 
-        function loadKYC() {
-            const container = document.getElementById('kyc-container');
-            container.innerHTML = `
-                <table class="data-table">
-                    <thead>
-                        <tr><th>Cliente</th><th>RIF</th><th>Estatus</th><th>Riesgo</th></tr>
-                    </thead>
-                    <tbody>
-                        ${localClients.map(c => `
-                            <tr>
-                                <td>${c.nombre}</td>
-                                <td>${c.rif}</td>
-                                <td><span class="status-pill ${c.estatus.toLowerCase().includes('pendiente') ? 'pending' : 'complete'}">${c.estatus}</span></td>
-                                <td>${c.riesgo}</td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-            `;
-        }
-
-        function loadAccounting() {
-            const container = document.getElementById('accounting-container');
-            import('./src/data/chartOfAccounts.js').then(module => {
-                const accounts = module.PlanDeCuentas;
-                container.innerHTML = `
-                    <table class="data-table">
-                        <thead><tr><th>Código</th><th>Descripción</th><th>Saldo (Bs.)</th></tr></thead>
-                        <tbody>
-                            ${accounts.map(acc => `<tr><td>${acc.codigo}</td><td>${acc.descripcion}</td><td>${acc.saldo.toLocaleString('es-VE')}</td></tr>`).join('')}
-                        </tbody>
-                    </table>
-                `;
-            });
-        }
-
-        function loadRates() {
-            const container = document.getElementById('rates-container');
-            container.innerHTML = `
-                <div style="display: flex; gap: 2rem; align-items: center;">
-                    <div style="font-size: 3rem; font-weight: bold; color: var(--accent-gold);">54.20 Bs.</div>
-                    <div>
-                        <p style="color: var(--text-secondary);">Tasa Oficial BCV (USD)</p>
-                        <p style="font-size: 0.8rem;">Última actualización: Hoy, 09:00 AM</p>
-                    </div>
-                </div>
-                <button style="margin-top: 2rem;">Sincronizar con Web del BCV</button>
-            `;
-        }
         // --- MOTOR DE AUTOMATIZACIÓN (CUMPLIMIENTO) ---
         setInterval(() => {
-            const currentSolvencia = parseFloat(document.getElementById('solvencia-val').innerText);
-            if (currentSolvencia < 150) {
-                reportCtrl.audit.log(currentUser, "ALERTA_CRITICA", "RIESGOS", "Índice de Solvencia por debajo del mínimo regulatorio (150%).", "WARNING");
-                console.warn("ALERTA: Solvencia Crítica detectada. Sistema CBCNV notificando a junta directiva...");
+            const elSolvencia = document.getElementById('solvencia-val');
+            if (elSolvencia) {
+                const currentSolvencia = parseFloat(elSolvencia.innerText);
+                if (currentSolvencia < 150) {
+                    reportCtrl.audit.log(currentUser, "ALERTA_CRITICA", "RIESGOS", "Índice de Solvencia por debajo del mínimo regulatorio (150%).", "WARNING");
+                    console.warn("ALERTA: Solvencia Crítica detectada.");
+                }
             }
-        }, 10000); // Chequeo cada 10 seg.
+        }, 30000);
 
         window.autoSendReports = () => {
             alert("ENVIANDO REPORTES: Conectando con reportes.gci@sunaval.gob.ve...");
