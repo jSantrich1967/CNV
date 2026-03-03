@@ -137,5 +137,80 @@ button:hover {
     font-size: 0.9rem;
 }
 
-.alert-item.critical { color: var(--danger); font-weight: bold; }
-.alert-item.warning { color: var(--warning); }
+/* Sidebar Navigation */
+#nav-links {
+    margin-top: 2rem;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background-color: var(--bg-tertiary);
+    color: var(--accent-gold);
+}
+
+.nav-item i {
+    margin-right: 15px;
+    font-size: 1.2rem;
+}
+
+/* Module Containers */
+.module-view {
+    display: none;
+}
+
+.module-view.active {
+    display: block;
+}
+
+/* Tables & Lists */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+}
+
+.data-table th,
+.data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.data-table th {
+    color: var(--accent-gold);
+    font-weight: 600;
+}
+
+.status-pill {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-pill.complete {
+    background: rgba(0, 230, 118, 0.1);
+    color: var(--success);
+}
+
+.status-pill.pending {
+    background: rgba(255, 171, 64, 0.1);
+    color: var(--warning);
+}
+
+.status-pill.error {
+    background: rgba(255, 77, 77, 0.1);
+    color: var(--danger);
+}

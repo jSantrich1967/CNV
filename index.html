@@ -13,42 +13,73 @@
         <aside id="sidebar">
             <div class="logo">CBCNV</div>
             <nav id="nav-links">
-                <!-- Se poblará dinámicamente -->
+                <div class="nav-item active" data-view="dashboard-view">Dashboard</div>
+                <div class="nav-item" data-view="kyc-view">Expedientes (KYC)</div>
+                <div class="nav-item" data-view="accounting-view">Contabilidad</div>
+                <div class="nav-item" data-view="rates-view">Tasas BCV</div>
+                <div class="nav-item" data-view="audit-view">Auditoría</div>
             </nav>
         </aside>
 
         <main id="main-content">
             <header id="header">
-                <h1>Dashboard de Cumplimiento SUNAVAL</h1>
+                <h1 id="view-title">Dashboard de Cumplimiento SUNAVAL</h1>
                 <div id="user-profile">Oficial de Cumplimiento: Jack Nickelsen</div>
             </header>
 
-            <section id="widgets-grid">
-                <div class="widget-card" id="indices-widget">
-                    <span class="widget-title">Índice de Solvencia</span>
-                    <div class="widget-value" id="solvencia-val">--%</div>
-                    <div id="solvencia-status">PENDIENTE</div>
-                </div>
-
-                <div class="widget-card" id="portfolio-widget">
-                    <span class="widget-title">Alertas de Portafolio</span>
-                    <div id="portfolio-alerts-list">No hay alertas</div>
-                </div>
-
-                <div class="widget-card" id="reports-section">
-                    <span class="widget-title">Reportes Regulatorios</span>
-                    <div id="reports-actions">
-                        <button id="btn-forma-a">Generar Forma A (Balance)</button>
-                        <button id="btn-forma-b">Generar Forma B (Resultados)</button>
-                        <button id="btn-forma-c">Generar Forma C (Patrimonio)</button>
-                        <button id="btn-rias">Enviar RIAS (Mes)</button>
+            <!-- VISTA: DASHBOARD -->
+            <div id="dashboard-view" class="module-view active">
+                <section id="widgets-grid">
+                    <div class="widget-card" id="indices-widget">
+                        <span class="widget-title">Índice de Solvencia</span>
+                        <div class="widget-value" id="solvencia-val">--%</div>
+                        <div id="solvencia-status">PENDIENTE</div>
                     </div>
-                </div>
-            </section>
 
-            <div id="alerts-panel">
-                <h3>Alertas de Riesgo</h3>
-                <div id="alerts-container">Buscando alertas...</div>
+                    <div class="widget-card" id="portfolio-widget">
+                        <span class="widget-title">Alertas de Portafolio</span>
+                        <div id="portfolio-alerts-list">No hay alertas</div>
+                    </div>
+
+                    <div class="widget-card" id="reports-section">
+                        <span class="widget-title">Reportes Regulatorios</span>
+                        <div id="reports-actions">
+                            <button id="btn-forma-a">Generar Forma A (Balance)</button>
+                            <button id="btn-forma-b">Generar Forma B (Resultados)</button>
+                            <button id="btn-forma-c">Generar Forma C (Patrimonio)</button>
+                            <button id="btn-rias">Enviar RIAS (Mes)</button>
+                        </div>
+                    </div>
+                </section>
+
+                <div id="alerts-panel">
+                    <h3>Alertas de Riesgo</h3>
+                    <div id="alerts-container">Buscando alertas...</div>
+                </div>
+            </div>
+
+            <!-- VISTA: KYC -->
+            <div id="kyc-view" class="module-view">
+                <div class="widget-card">
+                    <span class="widget-title">Gestión de Expedientes Digitales</span>
+                    <div id="kyc-container">Cargando base de datos de clientes...</div>
+                </div>
+            </div>
+
+            <!-- VISTA: CONTABILIDAD -->
+            <div id="accounting-view" class="module-view">
+                <div class="widget-card">
+                    <span class="widget-title">Manual de Contabilidad SUNAVAL</span>
+                    <div id="accounting-container">Cargando Plan de Cuentas...</div>
+                </div>
+            </div>
+
+            <!-- VISTA: TASAS -->
+            <div id="rates-view" class="module-view">
+                <div class="widget-card">
+                    <span class="widget-title">Configuración de Monedas e Índices</span>
+                    <div id="rates-container">Sincronizando con BCV...</div>
+                </div>
             </div>
         </main>
     </div>
@@ -120,18 +151,79 @@
             }, 1500);
         });
 
-        // Simulación de datos de portafolio para las alertas
-        const mockPortafolioT = [
-            { nombre: "Bono VENEZ 2027", fechaAdquisicion: "2023-10-01" }, // > 90 días
-            { nombre: "Tasa Local ABC", fechaAdquisicion: new Date().toISOString() }
-        ];
+        // --- SISTEMA DE NAVEGACIÓN (SPA) ---
+        const navItems = document.querySelectorAll('.nav-item');
+        const views = document.querySelectorAll('.module-view');
+        const viewTitle = document.getElementById('view-title');
 
-        // Renderizar alertas de portafolio específicamente
-        import { PortfolioManager } from './src/logic/portfolio.js';
-        const pm = new PortfolioManager(mockPortafolioT, []);
-        const pAlerts = pm.validatePortafolioT();
-        if (pAlerts.length > 0) {
-            document.getElementById('portfolio-alerts-list').innerHTML = pAlerts.map(a => `<div class="alert-item exceeded" style="color: var(--danger); margin-bottom: 5px;">⚠️ ${a.msg}</div>`).join('');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const targetViewId = item.getAttribute('data-view');
+
+                // Actualizar UI de navegación
+                navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+
+                // Cambiar Visibilidad de Vistas
+                views.forEach(view => {
+                    view.classList.remove('active');
+                    if (view.id === targetViewId) {
+                        view.classList.add('active');
+                        viewTitle.innerText = item.innerText;
+                    }
+                });
+
+                // Cargar datos del módulo si es la primera vez (Simulación)
+                if (targetViewId === 'kyc-view') loadKYC();
+                if (targetViewId === 'accounting-view') loadAccounting();
+                if (targetViewId === 'rates-view') loadRates();
+            });
+        });
+
+        // --- CARGA DE MÓDULOS (MOCKS) ---
+        function loadKYC() {
+            const container = document.getElementById('kyc-container');
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead>
+                        <tr><th>Cliente</th><th>RIF</th><th>Estatus</th><th>Riesgo</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Inversora Alcaraván</td><td>J-301234567</td><td><span class="status-pill complete">Completo</span></td><td>Bajo</td></tr>
+                        <tr><td>Corporación del Lago</td><td>G-200987654</td><td><span class="status-pill pending">Pendiente RIF</span></td><td>Medio</td></tr>
+                        <tr><td>Suministros Globales</td><td>J-400112233</td><td><span class="status-pill error">Vencido</span></td><td>Alto</td></tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function loadAccounting() {
+            const container = document.getElementById('accounting-container');
+            import('./src/data/chartOfAccounts.js').then(module => {
+                const accounts = module.PlanDeCuentas;
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead><tr><th>Código</th><th>Descripción</th><th>Saldo (Bs.)</th></tr></thead>
+                        <tbody>
+                            ${accounts.map(acc => `<tr><td>${acc.codigo}</td><td>${acc.descripcion}</td><td>${acc.saldo.toLocaleString('es-VE')}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                `;
+            });
+        }
+
+        function loadRates() {
+            const container = document.getElementById('rates-container');
+            container.innerHTML = `
+                <div style="display: flex; gap: 2rem; align-items: center;">
+                    <div style="font-size: 3rem; font-weight: bold; color: var(--accent-gold);">54.20 Bs.</div>
+                    <div>
+                        <p style="color: var(--text-secondary);">Tasa Oficial BCV (USD)</p>
+                        <p style="font-size: 0.8rem;">Última actualización: Hoy, 09:00 AM</p>
+                    </div>
+                </div>
+                <button style="margin-top: 2rem;">Sincronizar con Web del BCV</button>
+            `;
         }
     </script>
 </body>
