@@ -70,7 +70,10 @@ export class ReportController {
             head: [['Código', 'Descripción de Cuenta', 'Saldo (Bs.)']],
             body: tableData,
             theme: 'striped',
-            headStyles: { fillColor: [0, 51, 102] }
+            headStyles: { fillColor: [0, 51, 102], halign: 'center' },
+            columnStyles: {
+                2: { halign: 'right' } // Alinear el Saldo a la derecha
+            }
         });
 
         doc.save(`${filename}.pdf`);
