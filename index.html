@@ -81,11 +81,31 @@
 
                     <div class="widget-card" id="reports-section">
                         <span class="widget-title">Reportes Regulatorios</span>
-                        <div id="reports-actions">
-                            <button id="btn-forma-a">Generar Forma A (Balance)</button>
-                            <button id="btn-forma-b">Generar Forma B (Resultados)</button>
-                            <button id="btn-forma-c">Generar Forma C (Patrimonio)</button>
-                            <button id="btn-rias">Enviar RIAS (Mes)</button>
+                        <div id="reports-actions" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                            <button id="btn-pre-a" class="btn-primary" style="font-size: 0.8rem;">Previsualizar Forma
+                                A</button>
+                            <button id="btn-forma-a" class="btn-primary"
+                                style="font-size: 0.8rem; background: var(--bg-tertiary);">PDF Forma A</button>
+                            <button id="btn-forma-a-xl" class="btn-primary"
+                                style="font-size: 0.8rem; background: #1D6F42;">Excel Forma A</button>
+
+                            <hr style="grid-column: span 2; border: 0.5px solid var(--bg-tertiary); margin: 0.5rem 0;">
+
+                            <button id="btn-pre-b" class="btn-primary" style="font-size: 0.8rem;">Previsualizar Forma
+                                B</button>
+                            <button id="btn-forma-b" class="btn-primary"
+                                style="font-size: 0.8rem; background: var(--bg-tertiary);">PDF Forma B</button>
+
+                            <hr style="grid-column: span 2; border: 0.5px solid var(--bg-tertiary); margin: 0.5rem 0;">
+
+                            <button id="btn-pre-c" class="btn-primary" style="font-size: 0.8rem;">Previsualizar Forma
+                                C</button>
+                            <button id="btn-forma-c" class="btn-primary"
+                                style="font-size: 0.8rem; background: var(--bg-tertiary);">PDF Forma C</button>
+
+                            <button id="btn-rias" class="btn-primary"
+                                style="grid-column: span 2; margin-top: 1rem; border: 1px solid var(--accent-gold); background: transparent; color: var(--accent-gold);">Enviar
+                                RIAS (Mes Actual)</button>
                         </div>
                     </div>
                 </section>
