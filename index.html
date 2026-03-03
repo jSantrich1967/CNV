@@ -10,28 +10,46 @@
 
 <body class="dark-mode">
     <div id="app">
-        <!-- Sidebar se inyectaría aquí según ROLES -->
-        <aside id="sidebar"></aside>
+        <aside id="sidebar">
+            <div class="logo">CBCNV</div>
+            <nav id="nav-links">
+                <!-- Se poblará dinámicamente -->
+            </nav>
+        </aside>
 
         <main id="main-content">
             <header id="header">
                 <h1>Dashboard de Cumplimiento SUNAVAL</h1>
-                <div id="user-profile"></div>
+                <div id="user-profile">Oficial de Cumplimiento: Jack Nickelsen</div>
             </header>
 
             <section id="widgets-grid">
-                <!-- Los widgets de Stitch se vuelven dinámicos aquí -->
-                <div id="indices-widget"></div>
-                <div id="portfolio-widget"></div>
-                <div id="reports-actions">
-                    <button id="btn-forma-a">Generar Forma A (Balance)</button>
-                    <button id="btn-forma-b">Generar Forma B (Resultados)</button>
-                    <button id="btn-forma-c">Generar Forma C (Patrimonio)</button>
-                    <button id="btn-cartera">Reporte de Cartera</button>
-                    <button id="btn-rias">Enviar RIAS (Mes)</button>
+                <div class="widget-card" id="indices-widget">
+                    <span class="widget-title">Índice de Solvencia</span>
+                    <div class="widget-value" id="solvencia-val">--%</div>
+                    <div id="solvencia-status">PENDIENTE</div>
                 </div>
-                <div id="alerts-panel"></div>
+
+                <div class="widget-card" id="portfolio-widget">
+                    <span class="widget-title">Alertas de Portafolio</span>
+                    <div id="portfolio-alerts-list">No hay alertas</div>
+                </div>
+
+                <div class="widget-card" id="reports-section">
+                    <span class="widget-title">Reportes Regulatorios</span>
+                    <div id="reports-actions">
+                        <button id="btn-forma-a">Generar Forma A (Balance)</button>
+                        <button id="btn-forma-b">Generar Forma B (Resultados)</button>
+                        <button id="btn-forma-c">Generar Forma C (Patrimonio)</button>
+                        <button id="btn-rias">Enviar RIAS (Mes)</button>
+                    </div>
+                </div>
             </section>
+
+            <div id="alerts-panel">
+                <h3>Alertas de Riesgo</h3>
+                <div id="alerts-container">Buscando alertas...</div>
+            </div>
         </main>
     </div>
 
@@ -50,14 +68,42 @@
             pasivoCorriente: 850000
         };
 
-        // Elementos UI (Mocks de componentes Stitch)
+        // Elementos UI reales
         const uiElements = {
-            solvenciaGauge: { setValue: (v) => console.log(`UI Solvencia: ${v}%`), setText: (t) => console.log(`UI Status: ${t}`) },
-            alertsContainer: document.getElementById('alerts-panel')
+            solvenciaVal: document.getElementById('solvencia-val'),
+            solvenciaStatus: {
+                setText: (t) => {
+                    const el = document.getElementById('solvencia-status');
+                    el.innerText = t;
+                    el.style.color = t === "CUMPLE" ? "var(--success)" : "var(--danger)";
+                }
+            },
+            solvenciaGauge: {
+                setValue: (v) => {
+                    document.getElementById('solvencia-val').innerText = `${v.toFixed(1)}%`;
+                }
+            },
+            alertsContainer: document.getElementById('alerts-container'),
+            portfolioAlertsList: document.getElementById('portfolio-alerts-list')
         };
 
         const dashboard = new DashboardController(uiElements, financialData);
+
+        // Simulación de datos de portafolio para las alertas
+        const mockPortafolioT = [
+            { nombre: "Bono VENEZ 2027", fechaAdquisicion: "2023-10-01" }, // > 90 días
+            { nombre: "Tasa Local ABC", fechaAdquisicion: new Date().toISOString() }
+        ];
+
         dashboard.init();
+
+        // Renderizar alertas de portafolio específicamente
+        import { PortfolioManager } from './src/logic/portfolio.js';
+        const pm = new PortfolioManager(mockPortafolioT, []);
+        const pAlerts = pm.validatePortafolioT();
+        if (pAlerts.length > 0) {
+            document.getElementById('portfolio-alerts-list').innerHTML = pAlerts.map(a => `<div class="alert-item exceeded">${a.msg}</div>`).join('');
+        }
     </script>
 </body>
 

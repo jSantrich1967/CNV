@@ -33,6 +33,8 @@ export class DashboardController {
         // Simulación de actualización de DOM
         if (this.ui.solvenciaGauge) {
             this.ui.solvenciaGauge.setValue(solvencia * 100);
+        }
+        if (this.ui.solvenciaStatus) {
             this.ui.solvenciaStatus.setText(solvencia >= 0.15 ? "CUMPLE" : "BAJO");
         }
 
