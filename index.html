@@ -13,6 +13,37 @@
 </head>
 
 <body class="dark-mode">
+    <!-- Login / 2FA Overlay -->
+    <div id="login-overlay"
+        style="position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg-primary); z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+        <div class="widget-card"
+            style="width: 400px; padding: 2.5rem; text-align: center; border: 1px solid var(--accent-gold);">
+            <h2 style="color: var(--accent-gold); margin-bottom: 0.5rem;">CBCNV Security</h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem;">Autenticación de Dos Factores (2FA)</p>
+            <div id="login-step-1">
+                <input type="password" id="login-pass" placeholder="Contraseña de Usuario"
+                    style="width: 100%; margin-bottom: 1rem; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--bg-tertiary); color: white; border-radius: 4px;">
+                <button onclick="handleLoginStep1()" class="btn-primary" style="width: 100%;">Siguiente</button>
+            </div>
+            <div id="login-step-2" style="display: none;">
+                <p style="font-size: 0.9rem; margin-bottom: 1rem;">Código de Token (Google Authenticator)</p>
+                <div style="display: flex; gap: 0.5rem; justify-content: center; margin-bottom: 1.5rem;">
+                    <input type="text" maxlength="1" id="otp-1"
+                        style="width: 40px; height: 50px; text-align: center; font-size: 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--bg-tertiary); color: var(--accent-gold);">
+                    <input type="text" maxlength="1" id="otp-2"
+                        style="width: 40px; height: 50px; text-align: center; font-size: 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--bg-tertiary); color: var(--accent-gold);">
+                    <input type="text" maxlength="1" id="otp-3"
+                        style="width: 40px; height: 50px; text-align: center; font-size: 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--bg-tertiary); color: var(--accent-gold);">
+                    <input type="text" maxlength="1" id="otp-4"
+                        style="width: 40px; height: 50px; text-align: center; font-size: 1.5rem; background: rgba(255,255,255,0.1); border: 1px solid var(--bg-tertiary); color: var(--accent-gold);">
+                </div>
+                <button onclick="handleLoginFinal()" class="btn-primary" style="width: 100%;">Verificar y
+                    Entrar</button>
+            </div>
+        </div>
+        <p style="margin-top: 2rem; font-size: 0.8rem; color: var(--text-secondary);">Acceda solo desde redes
+            autorizadas por la Casa de Bolsa.</p>
+    </div>
     <div id="app">
         <aside id="sidebar">
             <div class="logo">CBCNV</div>
@@ -363,33 +394,25 @@
             `;
         }
 
-        // --- GESTIÓN DE REGISTROS (FUNCIONALIDAD) ---
-        const localPortfolio = [
-            { nombre: "Vebono Oct 2026", tipo: "T", nominal: 50000, fecha: "2026-01-15", emisor: "República" },
-            { nombre: "PDVSA 2030", tipo: "PIC", nominal: 120000, fecha: "2025-11-20", emisor: "PDVSA" }
-        ];
-
-        document.getElementById('form-portfolio').addEventListener('submit', (e) => {
+        // --- GESTIÓN DE REGISTROS (IndexedDB) ---
+        document.getElementById('form-portfolio').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nuevoTitulo = {
+                id: Date.now(),
                 nombre: document.getElementById('port-nombre').value,
                 tipo: document.getElementById('port-tipo').value,
                 nominal: parseFloat(document.getElementById('port-nominal').value),
                 fecha: document.getElementById('port-fecha').value,
                 emisor: document.getElementById('port-emisor').value
             };
-            localPortfolio.unshift(nuevoTitulo);
+            await db.save('portfolio', nuevoTitulo);
+            reportCtrl.audit.log(currentUser, "PORTFOLIO_BUY", "OPERACIONES", `Compra: ${nuevoTitulo.nombre}`);
             loadPortfolio();
-            alert(`Título ${nuevoTitulo.nombre} registrado en el portafolio.`);
+            alert(`Título ${nuevoTitulo.nombre} guardado permanentemente.`);
             e.target.reset();
         });
 
-        const localClients = [
-            { nombre: "Inversora Alcaraván", rif: "J-301234567", estatus: "Completo", riesgo: "Bajo" },
-            { nombre: "Corporación del Lago", rif: "G-200987654", estatus: "Pendiente RIF", riesgo: "Medio" }
-        ];
-
-        document.getElementById('form-kyc').addEventListener('submit', (e) => {
+        document.getElementById('form-kyc').addEventListener('submit', async (e) => {
             e.preventDefault();
             const nuevoCliente = {
                 nombre: document.getElementById('kyc-nombre').value,
@@ -397,21 +420,32 @@
                 riesgo: document.getElementById('kyc-riesgo').value,
                 estatus: "Completado"
             };
-            localClients.unshift(nuevoCliente);
+            await db.save('clients', nuevoCliente);
+            reportCtrl.audit.log(currentUser, "CLIENT_ADD", "KYC", `Alta: ${nuevoCliente.nombre}`);
             loadKYC();
-            alert(`Cliente ${nuevoCliente.nombre} registrado con éxito en el sistema KYC.`);
+            alert(`Cliente ${nuevoCliente.nombre} registrado con éxito.`);
             e.target.reset();
         });
 
-        document.getElementById('form-accounting').addEventListener('submit', (e) => {
+        document.getElementById('form-accounting').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const codigo = document.getElementById('acc-codigo').value;
-            const monto = parseFloat(document.getElementById('acc-monto').value);
-            const tipo = document.getElementById('acc-tipo').value;
-
-            // Simulación de actualización de saldo en el Plan de Cuentas
-            alert(`Asiento Contable Registrado.\nCuenta: ${codigo}\nMonto: ${monto} Bs.\nTipo: ${tipo}\nEl saldo se reflejará en el próximo cierre.`);
+            const asiento = {
+                codigo: document.getElementById('acc-codigo').value,
+                monto: parseFloat(document.getElementById('acc-monto').value),
+                tipo: document.getElementById('acc-tipo').value,
+                concepto: document.getElementById('acc-concepto').value,
+                timestamp: new Date().toISOString()
+            };
+            await db.save('asientos', asiento);
+            reportCtrl.audit.log(currentUser, "JOURNAL_ENTRY", "ACCOUNTING", `Asiento: ${asiento.concepto}`);
+            alert(`Asiento Contable Registrado y Persistido.`);
             e.target.reset();
+        });
+
+        document.getElementById('btn-gen-gov').addEventListener('click', () => {
+            const data = reportCtrl.reporter.generateBuenGobierno({});
+            reportCtrl.renderPreview(data);
+            alert("SISTEMA: Informe de Buen Gobierno Generado.");
         });
 
         document.getElementById('btn-update-rate').addEventListener('click', () => {
@@ -422,33 +456,62 @@
             }
         });
 
-        function loadPortfolio() {
+        // --- CARGA DE MÓDULOS (DB FETCH) ---
+        async function loadPortfolio() {
+            const list = await db.getAll('portfolio');
             const container = document.getElementById('portfolio-container');
             container.innerHTML = `
                 <table class="data-table">
-                    <thead>
-                        <tr><th>Título</th><th>Emisor</th><th>Tipo</th><th>Nominal ($)</th><th>Adquisición</th><th>Alertas</th></tr>
-                    </thead>
+                    <thead><tr><th>Título</th><th>Tipo</th><th>Nominal ($)</th><th>Adquisición</th><th>Alertas</th></tr></thead>
                     <tbody>
-                        ${localPortfolio.map(p => {
+                        ${list.map(p => {
                 const dias = Math.floor((new Date() - new Date(p.fecha)) / (1000 * 60 * 60 * 24));
                 const alertHtml = (p.tipo === 'T' && dias > 90) ?
-                    '<span class="status-pill pending">Límite 90d Excedido</span>' :
-                    '<span class="status-pill complete">Cumple</span>';
-
-                return `
-                                <tr>
-                                    <td>${p.nombre}</td>
-                                    <td>${p.emisor}</td>
-                                    <td>Portafolio ${p.tipo}</td>
-                                    <td style="text-align: right;">${p.nominal.toLocaleString('es-VE')}</td>
-                                    <td>${p.fecha}</td>
-                                    <td>${alertHtml}</td>
-                                </tr>
-                            `;
+                    '<span class="status-pill pending">Excedido</span>' :
+                    '<span class="status-pill complete">OK</span>';
+                return `<tr><td>${p.nombre}</td><td>${p.tipo}</td><td style="text-align: right;">${p.nominal.toLocaleString('es-VE')}</td><td>${p.fecha}</td><td>${alertHtml}</td></tr>`;
             }).join('')}
+                        ${list.length === 0 ? '<tr><td colspan="5">Sin datos en cartera.</td></tr>' : ''}
                     </tbody>
                 </table>
+            `;
+        }
+
+        async function loadKYC() {
+            const list = await db.getAll('clients');
+            const container = document.getElementById('kyc-container');
+            container.innerHTML = `
+                <table class="data-table">
+                    <thead><tr><th>Cliente</th><th>RIF</th><th>Estatus</th><th>Riesgo</th></tr></thead>
+                    <tbody>
+                        ${list.map(c => `<tr><td>${c.nombre}</td><td>${c.rif}</td><td>${c.estatus}</td><td>${c.riesgo}</td></tr>`).join('')}
+                        ${list.length === 0 ? '<tr><td colspan="4">No hay clientes.</td></tr>' : ''}
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function loadAccounting() {
+            const container = document.getElementById('accounting-container');
+            import('./src/data/chartOfAccounts.js').then(module => {
+                const accounts = module.PlanDeCuentas;
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead><tr><th>Código</th><th>Descripción</th><th>Saldo (Bs.)</th></tr></thead>
+                        <tbody>
+                            ${accounts.map(acc => `<tr><td>${acc.codigo}</td><td>${acc.descripcion}</td><td style="text-align: right;">${acc.saldo.toLocaleString('es-VE')}</td></tr>`).join('')}
+                        </tbody>
+                    </table>
+                `;
+            });
+        }
+
+        function loadRates() {
+            document.getElementById('rates-container').innerHTML = `
+                <div style="display: flex; gap: 2rem; align-items: center;">
+                    <div style="font-size: 3rem; font-weight: bold; color: var(--accent-gold);">54.20 Bs.</div>
+                    <div><p style="color: var(--text-secondary);">Tasa Oficial BCV (USD)</p><p style="font-size: 0.8rem;">Última actualización: Hoy, 09:00 AM</p></div>
+                </div>
             `;
         }
 
