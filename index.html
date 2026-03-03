@@ -60,22 +60,87 @@
 
             <!-- VISTA: KYC -->
             <div id="kyc-view" class="module-view">
+                <div class="data-entry-panel">
+                    <h3>Registro de Nuevo Expediente</h3>
+                    <form id="form-kyc"
+                        style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>Nombre del Cliente / Razón Social</label>
+                            <input type="text" id="kyc-nombre" placeholder="Nombre completo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>RIF / Cédula</label>
+                            <input type="text" id="kyc-rif" placeholder="J-000000000" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Nivel de Riesgo</label>
+                            <select id="kyc-riesgo">
+                                <option value="Bajo">Bajo</option>
+                                <option value="Medio">Medio</option>
+                                <option value="Alto">Alto</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn-primary">Registrar Cliente</button>
+                        </div>
+                    </form>
+                </div>
                 <div class="widget-card">
-                    <span class="widget-title">Gestión de Expedientes Digitales</span>
+                    <span class="widget-title">Listado de Expedientes Digitales</span>
                     <div id="kyc-container">Cargando base de datos de clientes...</div>
                 </div>
             </div>
 
             <!-- VISTA: CONTABILIDAD -->
             <div id="accounting-view" class="module-view">
+                <div class="data-entry-panel">
+                    <h3>Registrar Asiento Contable</h3>
+                    <form id="form-accounting"
+                        style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+                        <div class="form-group">
+                            <label>Cuenta (Código)</label>
+                            <input type="text" id="acc-codigo" placeholder="Ej: 101" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto (Bs.)</label>
+                            <input type="number" id="acc-monto" placeholder="0.00" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo de Movimiento</label>
+                            <select id="acc-tipo">
+                                <option value="DEBE">Debe (+ Activos / - Pasivos)</option>
+                                <option value="HABER">Haber (- Activos / + Pasivos)</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="grid-column: span 2;">
+                            <label>Concepto / Descripción</label>
+                            <input type="text" id="acc-concepto" placeholder="Descripción de la operación">
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button type="submit" class="btn-primary">Registrar Asiento</button>
+                        </div>
+                    </form>
+                </div>
                 <div class="widget-card">
-                    <span class="widget-title">Manual de Contabilidad SUNAVAL</span>
+                    <span class="widget-title">Estado del Plan de Cuentas SUNAVAL</span>
                     <div id="accounting-container">Cargando Plan de Cuentas...</div>
                 </div>
             </div>
 
             <!-- VISTA: TASAS -->
             <div id="rates-view" class="module-view">
+                <div class="data-entry-panel">
+                    <h3>Actualización Manual de Tasa</h3>
+                    <div style="display: flex; gap: 1rem; align-items: flex-end;">
+                        <div class="form-group">
+                            <label>Nueva Tasa BCV (Bs./USD)</label>
+                            <input type="number" id="manual-rate" step="0.01" placeholder="54.20">
+                        </div>
+                        <button id="btn-update-rate" class="btn-primary">Actualizar Tasa</button>
+                    </div>
+                </div>
                 <div class="widget-card">
                     <span class="widget-title">Configuración de Monedas e Índices</span>
                     <div id="rates-container">Sincronizando con BCV...</div>
@@ -180,6 +245,45 @@
             });
         });
 
+        // --- GESTIÓN DE REGISTROS (FUNCIONALIDAD) ---
+        const localClients = [
+            { nombre: "Inversora Alcaraván", rif: "J-301234567", estatus: "Completo", riesgo: "Bajo" },
+            { nombre: "Corporación del Lago", rif: "G-200987654", estatus: "Pendiente RIF", riesgo: "Medio" }
+        ];
+
+        document.getElementById('form-kyc').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nuevoCliente = {
+                nombre: document.getElementById('kyc-nombre').value,
+                rif: document.getElementById('kyc-rif').value,
+                riesgo: document.getElementById('kyc-riesgo').value,
+                estatus: "Completado"
+            };
+            localClients.unshift(nuevoCliente);
+            loadKYC();
+            alert(`Cliente ${nuevoCliente.nombre} registrado con éxito en el sistema KYC.`);
+            e.target.reset();
+        });
+
+        document.getElementById('form-accounting').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const codigo = document.getElementById('acc-codigo').value;
+            const monto = parseFloat(document.getElementById('acc-monto').value);
+            const tipo = document.getElementById('acc-tipo').value;
+
+            // Simulación de actualización de saldo en el Plan de Cuentas
+            alert(`Asiento Contable Registrado.\nCuenta: ${codigo}\nMonto: ${monto} Bs.\nTipo: ${tipo}\nEl saldo se reflejará en el próximo cierre.`);
+            e.target.reset();
+        });
+
+        document.getElementById('btn-update-rate').addEventListener('click', () => {
+            const nuevaTasa = document.getElementById('manual-rate').value;
+            if (nuevaTasa) {
+                alert(`Tasa BCV actualizada a ${nuevaTasa} Bs./USD. Re-calculando índices patrimoniales...`);
+                loadRates(nuevaTasa);
+            }
+        });
+
         // --- CARGA DE MÓDULOS (MOCKS) ---
         function loadKYC() {
             const container = document.getElementById('kyc-container');
@@ -189,9 +293,14 @@
                         <tr><th>Cliente</th><th>RIF</th><th>Estatus</th><th>Riesgo</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>Inversora Alcaraván</td><td>J-301234567</td><td><span class="status-pill complete">Completo</span></td><td>Bajo</td></tr>
-                        <tr><td>Corporación del Lago</td><td>G-200987654</td><td><span class="status-pill pending">Pendiente RIF</span></td><td>Medio</td></tr>
-                        <tr><td>Suministros Globales</td><td>J-400112233</td><td><span class="status-pill error">Vencido</span></td><td>Alto</td></tr>
+                        ${localClients.map(c => `
+                            <tr>
+                                <td>${c.nombre}</td>
+                                <td>${c.rif}</td>
+                                <td><span class="status-pill ${c.estatus.toLowerCase().includes('pendiente') ? 'pending' : 'complete'}">${c.estatus}</span></td>
+                                <td>${c.riesgo}</td>
+                            </tr>
+                        `).join('')}
                     </tbody>
                 </table>
             `;

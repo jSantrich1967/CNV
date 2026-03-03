@@ -137,9 +137,56 @@ button:hover {
     font-size: 0.9rem;
 }
 
-/* Sidebar Navigation */
-#nav-links {
-    margin-top: 2rem;
+/* Forms & Inputs */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--bg-secondary);
+    border-radius: 4px;
+    color: var(--text-primary);
+    outline: none;
+    transition: var(--transition);
+}
+
+input:focus,
+select:focus {
+    border-color: var(--accent-gold);
+}
+
+.btn-primary {
+    background-color: var(--accent-gold);
+    color: var(--bg-primary);
+    border: none;
+    padding: 0.8rem 2rem;
+    font-weight: 700;
+    margin-top: 1rem;
+}
+
+.btn-primary:hover {
+    background-color: #E6C200;
+}
+
+/* Modals or Side Panels (Optional for now, using in-page forms) */
+.data-entry-panel {
+    background: var(--bg-secondary);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 1px dashed var(--bg-tertiary);
 }
 
 .nav-item {
